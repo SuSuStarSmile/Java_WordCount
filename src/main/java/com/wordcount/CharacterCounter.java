@@ -9,12 +9,12 @@ package com.wordcount;
  * 统计规则：
  * 1. 汉字：每个汉字算1个计数
  * 2. 英文单词：连续的英文字母算1个单词（算1个计数）
- * 3. 数字：每个数字字符算1个计数
+ * 3. 数字：连续的数字算1个计数（如"123"算1个计数）
  * 4. 标点符号：每个标点符号算1个计数
  * 5. 连续空格：多个连续空格只算1个计数
  * 
  * @author AI Assistant
- * @version 1.0
+ * @version 2.0
  */
 public class CharacterCounter {
     
@@ -28,7 +28,8 @@ public class CharacterCounter {
      * 1. 遍历字符串中的每个字符
      * 2. 根据字符类型进行分类统计
      * 3. 对于英文字母，需要识别连续的字母为一个单词
-     * 4. 对于空格，需要识别连续空格并只计数一次
+     * 4. 对于数字，需要识别连续的数字为一个数字串
+     * 5. 对于空格，需要识别连续空格并只计数一次
      */
     public static CountResult count(String text) {
         // 如果输入为空，返回全0的结果
@@ -39,12 +40,14 @@ public class CharacterCounter {
         // 初始化各类字符的计数器
         int chineseCount = 0;      // 汉字计数
         int englishWordCount = 0;  // 英文单词计数
-        int numberCount = 0;       // 数字计数
+        int numberCount = 0;       // 数字串计数（连续数字算1个）
         int punctuationCount = 0;  // 标点符号计数
         int spaceCount = 0;        // 空格计数
         
         // 标记是否正在处理英文单词（用于识别连续的英文字母）
         boolean inEnglishWord = false;
+        // 标记是否正在处理数字串（用于识别连续的数字）
+        boolean inNumber = false;
         // 标记是否正在处理空格（用于识别连续的空格）
         boolean inSpace = false;
         
@@ -60,6 +63,7 @@ public class CharacterCounter {
             if (isChinese(c)) {
                 chineseCount++;  // 每个汉字算1个计数
                 inEnglishWord = false;  // 遇到汉字，英文单词结束
+                inNumber = false;       // 遇到汉字，数字串结束
                 inSpace = false;        // 遇到汉字，空格序列结束
             }
             // 判断是否为英文字母
@@ -70,11 +74,17 @@ public class CharacterCounter {
                     inEnglishWord = true;  // 标记进入英文单词状态
                 }
                 // 如果已经在英文单词中，不增加计数（因为连续字母算一个单词）
-                inSpace = false;  // 遇到字母，空格序列结束
+                inNumber = false;  // 遇到字母，数字串结束
+                inSpace = false;   // 遇到字母，空格序列结束
             }
             // 判断是否为数字
             else if (Character.isDigit(c)) {
-                numberCount++;  // 每个数字算1个计数
+                // 如果之前不在数字串中，说明这是一个新数字串的开始
+                if (!inNumber) {
+                    numberCount++;  // 新数字串计数+1
+                    inNumber = true;  // 标记进入数字串状态
+                }
+                // 如果已经在数字串中，不增加计数（因为连续数字算一个）
                 inEnglishWord = false;  // 遇到数字，英文单词结束
                 inSpace = false;        // 遇到数字，空格序列结束
             }
@@ -87,11 +97,13 @@ public class CharacterCounter {
                 }
                 // 如果已经在空格序列中，不增加计数（因为连续空格算一个）
                 inEnglishWord = false;  // 遇到空格，英文单词结束
+                inNumber = false;       // 遇到空格，数字串结束
             }
             // 其他情况视为标点符号或特殊字符
             else {
                 punctuationCount++;  // 每个标点符号算1个计数
                 inEnglishWord = false;  // 遇到标点，英文单词结束
+                inNumber = false;       // 遇到标点，数字串结束
                 inSpace = false;        // 遇到标点，空格序列结束
             }
         }
@@ -153,7 +165,7 @@ public class CharacterCounter {
         private final int total;            // 总计数
         private final int chineseCount;     // 汉字数量
         private final int englishWordCount; // 英文单词数量
-        private final int numberCount;      // 数字数量
+        private final int numberCount;      // 数字串数量（连续数字算1个）
         private final int punctuationCount; // 标点符号数量
         private final int spaceCount;       // 空格序列数量
         
@@ -163,7 +175,7 @@ public class CharacterCounter {
          * @param total 总计数
          * @param chineseCount 汉字数量
          * @param englishWordCount 英文单词数量
-         * @param numberCount 数字数量
+         * @param numberCount 数字串数量（连续数字算1个）
          * @param punctuationCount 标点符号数量
          * @param spaceCount 空格序列数量
          */
@@ -196,7 +208,7 @@ public class CharacterCounter {
             sb.append("========== 字符统计结果 ==========\n");
             sb.append("汉字数量：").append(chineseCount).append("\n");
             sb.append("英文单词数量：").append(englishWordCount).append("\n");
-            sb.append("数字数量：").append(numberCount).append("\n");
+            sb.append("数字串数量（连续数字算1个）：").append(numberCount).append("\n");
             sb.append("标点符号数量：").append(punctuationCount).append("\n");
             sb.append("空格（连续空格算1个）：").append(spaceCount).append("\n");
             sb.append("--------------------------------\n");

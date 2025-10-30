@@ -10,7 +10,7 @@
 
 1. **汉字统计**：每个汉字算1个计数
 2. **英文单词统计**：连续的英文字母算作1个单词（而不是每个字母单独计数）
-3. **数字统计**：每个数字字符算1个计数
+3. **数字统计**：连续的数字算1个计数（如"123"算1个，而不是3个）
 4. **标点符号统计**：每个标点符号算1个计数
 5. **空格统计**：连续的多个空格只算1个计数
 6. **总计数**：以上所有类型的计数之和
@@ -75,7 +75,7 @@ public class Example {
         System.out.println("总计数：" + result.getTotal());
         System.out.println("汉字数量：" + result.getChineseCount());
         System.out.println("英文单词数量：" + result.getEnglishWordCount());
-        System.out.println("数字数量：" + result.getNumberCount());
+        System.out.println("数字串数量：" + result.getNumberCount());
         System.out.println("标点符号数量：" + result.getPunctuationCount());
         System.out.println("空格数量：" + result.getSpaceCount());
         
@@ -94,11 +94,11 @@ public class Example {
 ========== 字符统计结果 ==========
 汉字数量：8
 英文单词数量：2
-数字数量：3
+数字串数量（连续数字算1个）：1
 标点符号数量：0
 空格（连续空格算1个）：0
 --------------------------------
-总计数：13
+总计数：11
 ================================
 ```
 
@@ -146,7 +146,7 @@ CountResult result = CharacterCounter.count("Hello 世界");
 | `getTotal()` | int | 获取总计数 |
 | `getChineseCount()` | int | 获取汉字数量 |
 | `getEnglishWordCount()` | int | 获取英文单词数量 |
-| `getNumberCount()` | int | 获取数字数量 |
+| `getNumberCount()` | int | 获取数字串数量（连续数字算1个） |
 | `getPunctuationCount()` | int | 获取标点符号数量 |
 | `getSpaceCount()` | int | 获取空格序列数量 |
 | `toString()` | String | 获取格式化的统计结果字符串 |
@@ -157,7 +157,7 @@ CountResult result = CharacterCounter.count("Hello 世界");
 程序采用状态机模式进行字符识别和统计：
 1. 逐字符遍历输入文本
 2. 根据字符的Unicode编码判断字符类型
-3. 使用状态标记识别连续的英文单词和空格序列
+3. 使用状态标记识别连续的英文单词、数字串和空格序列
 4. 累计各类字符的计数
 5. 返回封装好的统计结果对象
 
@@ -171,9 +171,10 @@ CountResult result = CharacterCounter.count("Hello 世界");
 
 1. 程序假设输入文本使用UTF-8编码
 2. 连续的英文字母会被识别为一个单词
-3. 连续的空格（包括tab、换行等空白字符）只会被计数一次
-4. 中文标点符号会被识别为汉字的一部分（因为它们属于CJK Unicode块）
-5. 所有不属于以上类别的字符都会被归类为标点符号
+3. 连续的数字会被识别为一个数字串（如"123-456"中的"123"和"456"是两个数字串）
+4. 连续的空格（包括tab、换行等空白字符）只会被计数一次
+5. 中文标点符号会被识别为汉字的一部分（因为它们属于CJK Unicode块）
+6. 所有不属于以上类别的字符都会被归类为标点符号
 
 ## 测试
 
@@ -189,8 +190,9 @@ CountResult result = CharacterCounter.count("Hello 世界");
 每个测试用例都会显示原文和详细的统计结果。
 
 ## 版本信息
-- 版本：1.0
+- 版本：2.0
 - 更新日期：2025-10-30
+- 主要更新：将数字统计从“每个数字单独计数”改为“连续数字算1个计数”
 
 ## 许可证
 本项目使用 LICENSE 文件中指定的许可证。
